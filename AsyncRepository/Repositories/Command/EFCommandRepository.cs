@@ -64,14 +64,14 @@ namespace AsyncRepository.Repositories.Command
             }
         }
 
-        public void Update(T entity)
+        public virtual void Update(T entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
             dbSet.Attach(entity);
             dbContext.Entry(entity).State = EntityState.Modified;
         }
 
-        public void UpdateRange(IEnumerable<T> entities)
+        public virtual void UpdateRange(IEnumerable<T> entities)
         {
             if (entities == null) throw new ArgumentNullException(nameof(entities));
             try

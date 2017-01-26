@@ -7,25 +7,19 @@ namespace AsyncRepository.Repositories.Command
     // EF6 implemenation of ICommandRepository
     public class EFCommandRepository<T> : ICommandRepository<T> where T : class
     {
-        private readonly DbContext dbContext;
-        private readonly DbSet<T> dbSet;
+        protected readonly DbContext dbContext;
+        protected readonly DbSet<T> dbSet;
 
         public EFCommandRepository(DbContext dbContext)
         {
+            if (dbContext == null) throw new ArgumentNullException(nameof(dbContext));
             this.dbContext = dbContext;
             dbSet = dbContext.Set<T>();
         }
 
         public virtual T Find(params object[] keyValues)
         {
-            var entity = dbSet.Find(keyValues);
-            if (entity != null)
-            {
-                // detaching the entity so calling Attach(entity) in the methods below won't throw duplicate key exceptions
-                // for example, using Find() to check for the existance of an entity and then calling Update() on the entity returned from Find()
-                dbContext.Entry(entity).State = EntityState.Detached;
-            }
-            return entity;
+            return dbSet.Find(keyValues);
         }
 
         public virtual void Add(T entity)
@@ -43,7 +37,10 @@ namespace AsyncRepository.Repositories.Command
         public virtual void Remove(T entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            dbSet.Attach(entity);
+            if (dbContext.Entry(entity).State == EntityState.Detached)
+            {
+                dbSet.Attach(entity);
+            }
             dbSet.Remove(entity);
         }
 
@@ -67,13 +64,15 @@ namespace AsyncRepository.Repositories.Command
         public virtual void Update(T entity)
         {
             if (entity == null) throw new ArgumentNullException(nameof(entity));
-            dbSet.Attach(entity);
+            if (dbContext.Entry(entity).State == EntityState.Detached)
+            {
+                dbSet.Attach(entity);
+            }
             dbContext.Entry(entity).State = EntityState.Modified;
         }
 
         public virtual void UpdateRange(IEnumerable<T> entities)
         {
-            if (entities == null) throw new ArgumentNullException(nameof(entities));
             try
             {
                 dbContext.Configuration.AutoDetectChangesEnabled = false;

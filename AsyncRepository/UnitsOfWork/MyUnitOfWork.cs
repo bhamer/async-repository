@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using AsyncRepository.Models;
 using AsyncRepository.Repositories.Command;
+using System.Data.Entity;
 
 namespace AsyncRepository.UnitsOfWork
 {
@@ -43,5 +44,14 @@ namespace AsyncRepository.UnitsOfWork
         {
             return SaveChangesAsync();
         }
+        
+        #region EF stuff
+        /// <remarks>EF6 will check for migration history on every DB call unless the initializer is set to null in the most-derived class.</remarks>
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            Database.SetInitializer<MyUnitOfWork>(null);
+            base.OnModelCreating(modelBuilder);
+        }
+        #endregion
     }
 }

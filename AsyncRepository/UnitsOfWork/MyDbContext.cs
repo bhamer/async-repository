@@ -11,6 +11,11 @@ namespace AsyncRepository.UnitsOfWork
 
         public MyDbContext(string connectionString) 
             : base(connectionString) { }
+            
+        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        {
+            Database.SetInitializer<MyDbContext>(null);
+        }
     }
 
 }

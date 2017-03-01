@@ -35,14 +35,14 @@ namespace AsyncRepository.UnitsOfWork
             get { return tradeRepo.Value; }
         }
 
-        public void Commit()
+        public void Commit(string changeUser)
         {
-            SaveChanges();
+            SaveChanges(changeUser);
         }
 
-        public Task CommitAsync()
+        public Task CommitAsync(string changeUser)
         {
-            return SaveChangesAsync();
+            return SaveChangesAsync(changeUser);
         }
         
         #region EF stuff

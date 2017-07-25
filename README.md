@@ -1,4 +1,4 @@
-##Revisiting the Repository and Unit of Work patterns in an asynchronous world
+## Revisiting the Repository and Unit of Work patterns in an asynchronous world
 In this article I'll be introducing a Repository and Unit of Work design that addresses several shortcomings of a design I've both used and seen regularly in the wild (search phrases like "EF base repository" or "C# generic repository" for examples).
 
 But first... let's review the [purpose](http://www.asp.net/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) of the Repository and Unit of Work patterns:
@@ -9,7 +9,7 @@ To get a bit a more specific, the Repository pattern decouples the business logi
 
 So now that we've got that thorough review under our belts, let's take a look at the common Repository and Unit of Work design I'm referencing and follow that up with my case for why it has some weaknesses and how they can be addressed.
 
-###The incumbent
+### The incumbent
 A common (and perfectly valid) implementation of the Repository and Unit of Work patterns begins by defining and implementing a repository interface per domain type. E.g. IPositionsRepository for a Position type and ITradesRepository for a Trade type. Each repository will have a constructor that takes in a DbContext (or some other ORM construct) as a parameter. The DbContext can then be shared across repositories or a unique DbContext can be passed into each repository.
 
 Here’s a look at that pattern:
@@ -80,7 +80,7 @@ public class PositionRepository : BaseRepository<Position>, IPositionRepository
 
 Here are the issues I've encountered using this design.
 
-#####Not async-friendly
+##### Not async-friendly
 This one is best shown through an example. Let's say we have a repository that we need to query twice within a method. For instance, a service that calculates the daily gain or loss for an account. To do this calculation we'll need positions for the day we care about and positions from the previous day.
 
 The service would have a reference to a PositionRepository and the method might look something like this:
@@ -103,7 +103,7 @@ The problem here is that our unit of work (DbContext) is not thread-safe. So whe
 
 And yes, I realize the GetPositionsForAccountAsync method could have a date range as it's parameter and our problem would be solved. But this was a contrived example to prove a point so bear with me.
 
-#####Constructor injection explosion
+##### Constructor injection explosion
 Being experienced object-oriented programmers, we have our business layer depend on abstractions by passing in repository interfaces as parameters to our services, controllers, etc.. 
 
 This means if a service is performing operations on multiple domain types, a repository for each of those types needs to be passed in as a parameter.
@@ -139,7 +139,7 @@ In this example, the PositionService constructor requires three repository param
 
 But let's forget about the subjective attractiveness of the code. This also means a repository needs to be added to the constructor every time a new domain type is required, which is extra work - and who likes extra work? This also becomes a hassle in unit testing. Whenever a new repository is added to the service, it means the service's unit tests will all break until the new repository is mocked up and injected.
 
-#####Broken unit of work
+##### Broken unit of work
 This one isn't necessarily an issue with the incumbent design, itself. It's an issue with a particular variant of the design that I've seen enough times that it's worth mentioning.
 
 The offending design is to pass in a unique unit of work (e.g. DbContext) to each repository and have a SaveChanges() method implemented for each repository. The SaveChanges() method is typically implemented in a generic base repository.
@@ -148,7 +148,7 @@ By using this design, the benefits of the unit of work pattern are greatly dimin
 
 The easiest way to spot a broken unit of work is the SaveChanges() method being called by multiple repositories in a single method. See example above in OpenPosition method.
 
-#####Leaking the ORM
+##### Leaking the ORM
 This one isn't limited to any specific implementation of the repository pattern but it's something I see quite often when Entity Framework is being used.
 
 Just search "C# generic base repository" and you'll see how prevalent this design is. Here's what I'm talking about:
@@ -171,7 +171,7 @@ To summarize, returning an IQueryable couples our repository to a specific ORM i
 
 So those are the problems I have with the repository and unit of work design I've described above. Now I'll discuss my proposed alternative.
 
-###An async-friendly, ORM-agnostic Repository and Unit of Work design
+### An async-friendly, ORM-agnostic Repository and Unit of Work design
 First off, I want to throw out the disclaimer that I'm not claiming to have come up with anything particularly unique here. This is really just an amalgamation of concepts I liked while researching alternatives to the design I described above and some trial and error using this design in a real project. So insert some "standing on the shoulders of giants" quote here.
 
 Let's start off by addressing the async-friendly requirement. To do this, I utilized the [CQRS](http://martinfowler.com/bliki/CQRS.html) pattern.
@@ -182,7 +182,7 @@ The way I integrated the CQRS pattern into the repository design is by splitting
 
 Let's focus on the query repositories first as that's the async-friendly part of the overall pattern.
 
-#####Query Repositories
+##### Query Repositories
 I went back and forth between these two methods of implementation:
 - Define a query interface per domain type (e.g. for a Position type there would be an IPositionQueryRepository)
 - Create a generic query interface and add type-specific extension methods to that interface (e.g. have an IQueryRepository\<T\> and create extension methods like this GetPositionsAsync(this IQueryRepository\<Position\> repo, DateTime positionDate))
@@ -242,7 +242,7 @@ public async Task<decimal> CalculateDailyGainLoss(string accountCode, DateTime p
 
 Alright, let's move on to the command repositories. 
 
-#####Command Repositories
+##### Command Repositories
 The ICommandRepository\<T\> interface will be acting as the mediator between the data access layer and the business layer for any state-change operations.
 ```csharp
 public interface ICommandRepository<T> where T : class
@@ -397,5 +397,5 @@ First take a look at the service's constructor and how the repository dependenci
 
 The second thing to observe is the unit of work pattern being utilized in the OpenPosition method. The method is making updates to multiple repositories and then committing the changes as a single transaction to the database. No broken unit of work here.
 
-###Conclusion
+### Conclusion
 In this article we examined an async-friendly, ORM-agnostic Repository and Unit of Work design that addresses several shortcomings of a design I've both used and seen regularly in the wild. The design isn't meant to be a silver bullet that should be used in all cases. My objective was to solve a particular set of problems while remaining true to the purpose of the Repository and Unit of Work patterns.

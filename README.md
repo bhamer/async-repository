@@ -1,13 +1,13 @@
 ## Revisiting the Repository and Unit of Work patterns in an asynchronous world
 In this article I'll be introducing a Repository and Unit of Work design that addresses several shortcomings of a design I've both used and seen regularly in the wild (search phrases like "EF base repository" or "C# generic repository" for examples).
 
-But first... let's review the [purpose](http://www.asp.net/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) of the Repository and Unit of Work patterns:
+First let's review the [purpose](http://www.asp.net/mvc/overview/older-versions/getting-started-with-ef-5-using-mvc-4/implementing-the-repository-and-unit-of-work-patterns-in-an-asp-net-mvc-application) of the Repository and Unit of Work patterns:
 
 > The repository and unit of work patterns are intended to create an abstraction layer between the data access layer and the business logic layer of an application. Implementing these patterns can help insulate your application from changes in the data store and can facilitate automated unit testing.
 
 To get a bit a more specific, the Repository pattern decouples the business logic layer from the data access layer by hiding the data access implementation details from the users of that data; the Unit of Work pattern provides a way of keeping track of logical transactions and, when it's time to save, translating those transactions to all-or-nothing state changes to the underlying data store.
 
-So now that we've got that thorough review under our belts, let's take a look at the common Repository and Unit of Work design I'm referencing and follow that up with my case for why it has some weaknesses and how they can be addressed.
+So now that we've got that review under our belts, let's take a look at the common Repository and Unit of Work design I'm referencing and follow that up with my case for why it has some weaknesses and how they can be addressed.
 
 ### The incumbent
 A common (and perfectly valid) implementation of the Repository and Unit of Work patterns begins by defining and implementing a repository interface per domain type. E.g. IPositionsRepository for a Position type and ITradesRepository for a Trade type. Each repository will have a constructor that takes in a DbContext (or some other ORM construct) as a parameter. The DbContext can then be shared across repositories or a unique DbContext can be passed into each repository.

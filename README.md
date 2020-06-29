@@ -167,7 +167,7 @@ And if that isn't a good enough reason to not return IQueryable. Another side ef
 
 To summarize, returning an IQueryable couples our repository to a specific ORM implementation. So if we want a truly ORM-agnostic repository, we should avoid returning IQueryable from our repository methods.
 
-So those are the problems I have with the repository and unit of work design I've described above. Now I'll discuss my proposed alternative.
+Those are the problems I have with the repository and unit of work designs described above. Now I'll discuss my proposed alternative.
 
 ### An async-friendly, ORM-agnostic Repository and Unit of Work design
 First off, I want to state that I haven't come up with anything particularly unique here. This is really just an amalgamation of concepts I liked while researching alternatives to the design I described above and some trial and error using this design in a real project.
@@ -175,7 +175,7 @@ First off, I want to state that I haven't come up with anything particularly uni
 Let's start off by addressing the async-friendly requirement. To do this, I utilized the [CQRS](http://martinfowler.com/bliki/CQRS.html) pattern.
 
 The way I integrated the CQRS pattern into the repository design is by splitting my repositories into two distinct categories:
-- Query Repositories: read-only, thread-safe, repos that do not result in any state changes
+- Query Repositories: read-only, thread-safe repos that do not result in any state changes
 - Command Repositories: repos that result in state changes
 
 Let's focus on the query repositories first as that's the async-friendly part of the overall pattern.
@@ -183,7 +183,7 @@ Let's focus on the query repositories first as that's the async-friendly part of
 #### Query Repositories
 I went back and forth between these two methods of implementation:
 - Define a query interface per domain type (e.g. for a Position type there would be an IPositionQueryRepository)
-- Create a generic query interface and add type-specific extension methods to that interface (e.g. have an IQueryRepository\<T\> and create extension methods like this GetPositionsAsync(this IQueryRepository\<Position\> repo, DateTime positionDate))
+- Create a generic query interface and add type-specific extension methods to that interface (e.g. have an IQueryRepository\<T\> and create extension methods like this: GetPositionsAsync(this IQueryRepository\<Position\> repo, DateTime positionDate))
 
 I picked the first option for a couple reasons. First, it's simpler to understand when you look at it. Second, and more importantly IMO, mocking repository methods for unit testing isn't naturally supported using extension methods.
 

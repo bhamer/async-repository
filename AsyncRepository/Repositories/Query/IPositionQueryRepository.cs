@@ -8,5 +8,6 @@ namespace AsyncRepository.Repositories.Query
     public interface IPositionQueryRepository
     {
         Task<IEnumerable<Position>> GetPositionsForAccountAsync(string accountCode, DateTime positionDate);
+        Task<Position> GetPositionAsync(string accountCode, int securityId);
     }
 }

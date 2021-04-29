@@ -363,6 +363,8 @@ public class MyUnitOfWork : MyDbContext, IMyUnitOfWork
 ```
 
 Here's a look at how this unit of work implementation could be used by the position service:
+
+*Note: `OpenPosition` has been changed to `AddOrUpdatePosition` in this repository's source code*
 ```csharp
 public class PositionService
 {

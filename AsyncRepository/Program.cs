@@ -8,9 +8,12 @@ namespace AsyncRepository
     {
         public void Main()
         {
-            // Inject dependencies into services and go have fun            
-            var positionsService = new PositionService(new MyUnitOfWork("connection string"));
-            var performanceService = new PerformanceService(new PositionQueryRepository("connection string"));
+            var uow = new MyUnitOfWork("connection string");
+            var positionQueryRepo = new PositionQueryRepository("connection string");
+
+            // Inject dependencies into services and go have fun
+            var positionService = new PositionService(uow, positionQueryRepo);
+            var performanceService = new PerformanceService(positionQueryRepo);
         }
     }
 }

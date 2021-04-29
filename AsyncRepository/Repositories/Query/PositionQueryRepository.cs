@@ -38,5 +38,14 @@ namespace AsyncRepository.Repositories.Query
                     .ToListAsync().ConfigureAwait(false);
             }
         }
+
+        public async Task<Position> GetPositionAsync(string accountCode, int securityId)
+        {
+            using (var conn = new SqlConnection(connectionString))
+            {
+                return await conn.QueryFirstOrDefaultAsync<Position>("select * from Position where AccountCode = @AccountCode and SecurityId = @SecurityId",
+                    new { AccountCode = accountCode, SecurityId = securityId }).ConfigureAwait(false);
+            }
+        }
     }
 }

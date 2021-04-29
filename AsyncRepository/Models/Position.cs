@@ -8,5 +8,6 @@ namespace AsyncRepository.Models
         public DateTime PositionDate { get; set; }
         public decimal MarketValue { get; set; }
         public string AccountCode { get; set; }
+        public int SecurityId { get; set; }
     }
 }

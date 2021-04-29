@@ -92,7 +92,7 @@ public async Task<decimal> CalculateDailyGainLoss(string accountCode, DateTime p
 	// wait for both methods to complete asynchronously
 	await Task.WhenAll(todaysPositionsTask, yesterdaysPositionsTask); // exception thrown here
 
-	// calculate day over day GL using today's and yesterday's positions
+	// calculate day-over-day GL using today's and yesterday's positions
 	return todaysPositionsTask.Result.Sum(p => p.MarketValue) - yesterdaysPositionsTask.Result.Sum(p => p.MarketValue);            
 }
 ```
@@ -233,7 +233,7 @@ public async Task<decimal> CalculateDailyGainLoss(string accountCode, DateTime p
 	// wait for both methods to complete asynchronously
 	await Task.WhenAll(todaysPositionsTask, yesterdaysPositionsTask).ConfigureAwait(false);
 
-	// calculate day over day GL using today's and yesterday's positions
+	// calculate day-over-day GL using today's and yesterday's positions
 	return todaysPositionsTask.Result.Sum(p => p.MarketValue) - yesterdaysPositionsTask.Result.Sum(p => p.MarketValue);            
 }
 ```

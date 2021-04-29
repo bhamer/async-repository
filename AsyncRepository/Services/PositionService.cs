@@ -26,7 +26,7 @@ namespace AsyncRepository.Services
             myUnitOfWork.PositionRepository.Add(position);
 
             // save changes to data store in a single transaction
-            myUnitOfWork.Commit();
+            myUnitOfWork.Commit("username");
         }
     }
 }

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Threading.Tasks;
-using AsyncRepository.Models;
+﻿using AsyncRepository.Models;
 using AsyncRepository.Repositories.Command;
+using System;
 using System.Data.Entity;
+using System.Threading.Tasks;
 
 namespace AsyncRepository.UnitsOfWork
 {
